@@ -37,9 +37,11 @@ identifier filenam, argv, envp;
 
 compat_do_execve(struct filename *filenam, ...) {
 ...
-+#ifdef CONFIG_KSU
-+	if (!ksu_execveat_hook)
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL); /* 32-bit su */
++#ifdef CONFIG_KSU // 32-bit su, 32-on-64 ksud support
++	if (unlikely(ksu_execveat_hook))
++		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
++	else
++		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
 +#endif
  	return do_execveat_common(AT_FDCWD, filenam, argv, envp, 0);
 }
@@ -241,8 +243,8 @@ attribute name __user;
 +#endif
 fstatat64(int dfd, const char __user *filename, ..., int flag) {
 ...
-+#ifdef CONFIG_KSU
-+	ksu_handle_stat(&dfd, &filename, &flag); /* 32-bit su */
++#ifdef CONFIG_KSU // 32-bit su
++	ksu_handle_stat(&dfd, &filename, &flag);
 +#endif
 error = vfs_fstatat(dfd, filename, &stat, flag);
 ...
