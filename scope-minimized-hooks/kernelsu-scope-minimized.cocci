@@ -392,6 +392,37 @@ do_umount(...) { ... }
 +}
 
 
+// File: security/selinux/hooks.c
+// Backport for Linux < 4.14
+@selinux_no_nnp_transition depends on file in "hooks.c"@
+identifier new_tsec, old_tsec;
+@@
+
+check_nnp_nosuid(...) {
+	...
+if (new_tsec->sid == old_tsec->sid)
+	return 0;
++
++#ifdef CONFIG_KSU
++static u32 ksu_sid;
++char *secdata;
++int error;
++u32 seclen;
++if (!ksu_sid) {
++		security_secctx_to_secid("u:r:su:s0", strlen("u:r:su:s0"), &ksu_sid);
++}
++error = security_secid_to_secctx(old_tsec->sid, &secdata, &seclen);
++if (!error) {
++	rc = strcmp("u:r:init:s0",secdata);
++	security_release_secctx(secdata, seclen);
++	if (rc == 0 && new_tsec->sid == ksu_sid) {
++		return 0;
++	}
++}
+... when != selinux_policycap_nnp_nosuid_transition
+}
+
+
 // File: include/linux/cred.h
 @has_get_cred_rcu depends on file in "include/linux/cred.h"@
 @@
