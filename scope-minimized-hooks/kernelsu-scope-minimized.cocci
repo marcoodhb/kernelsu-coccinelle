@@ -465,3 +465,28 @@ do { ... } while (
 	);
 ...
 }
+
+// File: include/linux/cred.h
+// Backport for Linux < 4.15
+@has_groups_sort_h depends on file in "include/linux/cred.h"@
+@@
+extern void groups_sort(struct group_info *);
+
+// Note: for some reason if I don't have a - line that patch never applies... Maybe a bug from Coccinelle?
+// So instead of putting the line as an anchor, I put it with a - and then a + and it somehow fixes the problem
+@groups_sort_h depends on file in "include/linux/cred.h" && never has_groups_sort_h@
+@@
+-extern bool may_setgroups(void);
++extern bool may_setgroups(void);
++extern void groups_sort(struct group_info *);
+
+// File: kernel/groups.c
+// Backport for Linux < 4.15
+@groups_sort depends on file in "groups.c"@
+@@
+-static void groups_sort(struct group_info *group_info)
++void groups_sort(struct group_info *group_info)
+{
+	...
+}
++EXPORT_SYMBOL(groups_sort);
