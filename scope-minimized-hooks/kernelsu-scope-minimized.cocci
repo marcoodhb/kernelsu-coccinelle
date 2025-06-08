@@ -343,3 +343,46 @@ devpts_get_priv(struct dentry *dentry) {
 +#endif
 ...
 }
+
+// File: include/linux/cred.h
+@has_get_cred_rcu depends on file in "include/linux/cred.h"@
+@@
+get_cred_rcu(const struct cred *cred) { ... }
+
+// File: include/linux/cred.h
+// Backport for Linux < 5.0
+@get_cred_rcu_h depends on file in "include/linux/cred.h" && never has_get_cred_rcu@
+@@
+
+get_cred(...) { ... }
+
++static inline const struct cred *get_cred_rcu(const struct cred *cred)
++{
++	struct cred *nonconst_cred = (struct cred *) cred;
++	if (!cred)
++		return NULL;
++#ifdef atomic_inc_not_zero
++	if (!atomic_inc_not_zero(&nonconst_cred->usage))
++		return NULL;
++#else
++	if (!atomic_long_inc_not_zero(&nonconst_cred->usage))
++		return NULL;
++#endif
++	validate_creds(cred);
++	return cred;
++}
+
+// File: kernel/cred.c
+// Backport for Linux < 5.0
+@get_cred_rcu depends on file in "cred.c"@
+identifier atomic_inc_not_zero =~ "atomic_inc_not_zero|atomic_long_inc_not_zero";
+@@
+
+get_task_cred(...) {
+...
+do { ... } while (
+-!atomic_inc_not_zero(&((struct cred *)cred)->usage)
++!get_cred_rcu(cred)
+	);
+...
+}

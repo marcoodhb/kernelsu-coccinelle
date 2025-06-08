@@ -15,5 +15,5 @@ They are based on https://github.com/backslashxx/KernelSU/issues/5
 2) Run this in your kernel directory:
 
 ```sh
-for p in fs drivers/input drivers/tty arch/arm/kernel; do spatch --sp-file kernelsu-scope-minimized.cocci --in-place --linux-spacing "$p"; done
+for p in fs drivers/input drivers/tty arch/arm/kernel kernel include/linux/cred.h; do spatch --sp-file kernelsu-scope-minimized.cocci --in-place --linux-spacing "$p"; done
 ```
