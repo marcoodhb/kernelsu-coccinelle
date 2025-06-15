@@ -5,7 +5,7 @@
 // File: fs/exec.c
 // Adds hook to asmlinkage int sys_execve()
 
-@do_execve_hook_minimized depends on file in "exec.c"@
+@do_execve_hook_minimized depends on file in "fs/exec.c"@
 identifier filenam, __argv, __envp;
 identifier argv, envp;
 type T1, T2;
@@ -33,7 +33,7 @@ do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
 ...
 }
 
-@compat_do_execve_hook_minimized depends on file in "exec.c"@
+@compat_do_execve_hook_minimized depends on file in "fs/exec.c"@
 identifier filenam, argv, envp;
 @@
 
@@ -51,7 +51,7 @@ compat_do_execve(struct filename *filenam, ...) {
 // Alternative for Linux <= 3.4
 // File arch/arm/kernel/sys_arm.c
 // Adds hook to asmlinkage int sys_execve()
-@do_execve_hook_minimized_alternative depends on file in "sys_arm.c" && never do_execve_hook_minimized@
+@do_execve_hook_minimized_alternative depends on file in "arch/arm/kernel/sys_arm.c" && never do_execve_hook_minimized@
 identifier filenamei, argv, envp;
 identifier error, filenam;
 type T1;
@@ -83,7 +83,7 @@ sys_execve(T1 filenamei, const char __user *const __user *argv, const char __use
 // Another alternative for Linux <= 3.4 (char * instead of struct filename *)
 // File arch/arm/kernel/sys_arm.c
 // Adds hook to asmlinkage int sys_execve()
-@do_execve_hook_minimized_alternative2 depends on file in "sys_arm.c" && never do_execve_hook_minimized@
+@do_execve_hook_minimized_alternative2 depends on file in "arch/arm/kernel/sys_arm.c" && never do_execve_hook_minimized@
 identifier filenamei, argv;
 identifier error, filename;
 type T1;
@@ -118,7 +118,7 @@ sys_execve(T1 filenamei, const char __user *const __user *argv, ...) {
 // Alternative for Linux 3.10
 // File fs/exec.c
 // Adds hook to SYSCALL_DEFINE3(execve, ...).
-@do_execve_hook_minimized_alternative3_1 depends on file in "exec.c" && never do_execve_hook_minimized && never do_execve_hook_minimized_alternative && never do_execve_hook_minimized_alternative2@
+@do_execve_hook_minimized_alternative3_1 depends on file in "fs/exec.c" && never do_execve_hook_minimized && never do_execve_hook_minimized_alternative && never do_execve_hook_minimized_alternative2@
 identifier filenam, argv, envp;
 identifier path, error;
 type T1;
@@ -165,7 +165,7 @@ error = compat_do_execve(...);
 // File: fs/open.c
 // Adds hook to SYSCALL_DEFINE3(faccessat, ...).
 
-@sys_faccessat_hook_minimized depends on file in "open.c"@
+@sys_faccessat_hook_minimized depends on file in "fs/open.c"@
 identifier dfd, filename, mode;
 statement S1, S2;
 attribute name __user;
@@ -187,7 +187,7 @@ S2
 // File: fs/read_write.c
 // Adds hook to SYSCALL_DEFINE3(read, ...).
 
-@sys_read_hook_minimized depends on file in "read_write.c" exists@
+@sys_read_hook_minimized depends on file in "fs/read_write.c" exists@
 identifier fd, buf, count, ret, pos;
 attribute name __user, __read_mostly;
 @@
@@ -218,7 +218,7 @@ read(unsigned int fd, char __user *buf, size_t count) {
 // File: fs/stat.c
 // Adds hook to SYSCALL_DEFINE4(newfstatat, ...)
 
-@sys_newfstatat_hook_minimized depends on file in "stat.c" exists@
+@sys_newfstatat_hook_minimized depends on file in "fs/stat.c" exists@
 identifier dfd, filename, flag, error, stat;
 attribute name __user;
 @@
@@ -238,7 +238,7 @@ error = vfs_fstatat(dfd, filename, &stat, flag);
 // File: fs/stat.c
 // Adds hook to SYSCALL_DEFINE4(fstatat64, ...).
 
-@sys_fstatat64_hook_minimized depends on file in "stat.c" exists@
+@sys_fstatat64_hook_minimized depends on file in "fs/stat.c" exists@
 identifier dfd, filename, stat, flag, error;
 attribute name __user;
 @@
@@ -258,7 +258,7 @@ error = vfs_fstatat(dfd, filename, &stat, flag);
 // File: drivers/input/input.c
 // Adds hook to input_event(...).
 
-@input_event_hook_minimized depends on file in "input.c"@
+@input_event_hook_minimized depends on file in "drivers/input/input.c"@
 identifier dev, typ, code, value;
 attribute name __read_mostly;
 statement S1, S2;
@@ -286,7 +286,7 @@ S2
 // File: drivers/input/input.c
 // Adds hook to input_handle_event(...).
 
-@input_event_hook_minimized_alternative depends on file in "input.c" && never input_event_hook_minimized@
+@input_event_hook_minimized_alternative depends on file in "drivers/input/input.c" && never input_event_hook_minimized@
 identifier dev, typ, code, value;
 attribute name __read_mostly;
 statement S1, S2;
@@ -314,7 +314,7 @@ S2
 // File: drivers/tty/pty.c
 // Adds hook to pts_unix98_lookup(...) with struct file* parameter.
 
-@pts_unix98_lookup_file_hook_minimized depends on file in "pty.c"@
+@pts_unix98_lookup_file_hook_minimized depends on file in "drivers/tty/pty.c"@
 identifier file;
 statement S1, S2;
 @@
@@ -333,7 +333,7 @@ S2
 // File: drivers/tty/pty.c
 // Adds hook to pts_unix98_lookup(...) with struct inode* parameter.
 
-@pts_unix98_lookup_file_hook_minimized_alternative depends on file in "pty.c"@
+@pts_unix98_lookup_file_hook_minimized_alternative depends on file in "drivers/tty/pty.c"@
 identifier pts_inode;
 statement S1, S2;
 @@
@@ -354,7 +354,7 @@ S2
 // File: fs/devpts/inode.c
 // Adds hook to devpts_get_priv(...).
 
-@devpts_get_priv depends on file in "inode.c"@
+@devpts_get_priv depends on file in "fs/devpts/inode.c"@
 identifier dentry;
 statement S1, S2;
 @@
@@ -379,7 +379,7 @@ can_umount(const struct path *path, int flags) { ... }
 
 // Backport for Linux < 5.9
 // File: fs/namespace.c
-@path_umount depends on file in "namespace.c" && never has_can_umount@
+@path_umount depends on file in "fs/namespace.c" && never has_can_umount@
 @@
 do_umount(...) { ... }
 +static int can_umount(const struct path *path, int flags)
@@ -421,7 +421,7 @@ do_umount(...) { ... }
 
 // File: security/selinux/hooks.c
 // Backport for Linux < 4.14
-@selinux_no_nnp_transition depends on file in "hooks.c"@
+@selinux_no_nnp_transition depends on file in "security/selinux/hooks.c"@
 identifier new_tsec, old_tsec;
 @@
 
@@ -480,7 +480,7 @@ get_cred(...) { ... }
 
 // File: kernel/cred.c
 // Backport for Linux < 5.0
-@get_cred_rcu depends on file in "cred.c"@
+@get_cred_rcu depends on file in "kernel/cred.c"@
 identifier atomic_inc_not_zero =~ "atomic_inc_not_zero|atomic_long_inc_not_zero";
 @@
 
@@ -509,7 +509,7 @@ extern void groups_sort(struct group_info *);
 
 // File: kernel/groups.c
 // Backport for Linux < 4.15
-@groups_sort depends on file in "groups.c"@
+@groups_sort depends on file in "kernel/groups.c"@
 @@
 -static void groups_sort(struct group_info *group_info)
 +void groups_sort(struct group_info *group_info)

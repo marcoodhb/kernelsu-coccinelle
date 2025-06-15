@@ -9,9 +9,8 @@ They are based on https://github.com/backslashxx/KernelSU/issues/5
 # How to use
 
 1) Install [Coccinelle](https://coccinelle.gitlabpages.inria.fr/website/download.html).
-2) Copy `kernelsu-scope-minimized.cocci` to your kernel directory.
-2) Run this in your kernel directory:
+2) Run this:
 
 ```sh
-for p in fs drivers/input drivers/tty arch/arm/kernel kernel include/linux/cred.h security/selinux; do spatch --sp-file kernelsu-scope-minimized.cocci --in-place --linux-spacing "$p"; done
+./apply.sh /path/to/your/kernel/source
 ```
