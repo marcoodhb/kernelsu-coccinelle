@@ -20,8 +20,10 @@ attribute name __read_mostly;
 +				 void *argv, void *envp, int *flags);
 +#endif
 do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
+...
  	struct user_arg_ptr argv = { .ptr.native = __argv };
  	struct user_arg_ptr envp = { .ptr.native = __envp };
+
 +#ifdef CONFIG_KSU
 +	if (unlikely(ksu_execveat_hook))
 +		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
@@ -165,6 +167,7 @@ error = compat_do_execve(...);
 
 @sys_faccessat_hook_minimized depends on file in "open.c"@
 identifier dfd, filename, mode;
+statement S1, S2;
 attribute name __user;
 @@
 
@@ -173,10 +176,12 @@ attribute name __user;
 +			                    int *flags);
 +#endif
 faccessat(int dfd, const char __user *filename, int mode) {
+... when != S1
 +#ifdef CONFIG_KSU
 +	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
 +#endif
-...
+S2
+... when any
 }
 
 // File: fs/read_write.c
@@ -256,6 +261,7 @@ error = vfs_fstatat(dfd, filename, &stat, flag);
 @input_event_hook_minimized depends on file in "input.c"@
 identifier dev, typ, code, value;
 attribute name __read_mostly;
+statement S1, S2;
 @@
 
 +#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES) || defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
@@ -267,11 +273,13 @@ attribute name __read_mostly;
 +extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
+... when != S1
 +#ifdef CONFIG_KSU
 +	if (unlikely(ksu_input_hook))
 +		ksu_handle_input_handle_event(&typ, &code, &value);
 +#endif
-...
+S2
+... when any
 }
 
 // Alternative for Linux >= 5.4
@@ -281,6 +289,7 @@ input_event(struct input_dev *dev, unsigned int typ, unsigned int code, int valu
 @input_event_hook_minimized_alternative depends on file in "input.c" && never input_event_hook_minimized@
 identifier dev, typ, code, value;
 attribute name __read_mostly;
+statement S1, S2;
 @@
 
 +#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES) || defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
@@ -292,10 +301,12 @@ attribute name __read_mostly;
 +extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_handle_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
+... when != S1
 +#ifdef CONFIG_KSU
 +	if (unlikely(ksu_input_hook))
 +		ksu_handle_input_handle_event(&typ, &code, &value);
 +#endif
+S2
 ...
 }
 
@@ -305,16 +316,18 @@ input_handle_event(struct input_dev *dev, unsigned int typ, unsigned int code, i
 
 @pts_unix98_lookup_file_hook_minimized depends on file in "pty.c"@
 identifier file;
+statement S1, S2;
 @@
-
 +#ifdef CONFIG_KSU
 +extern int ksu_handle_devpts(struct inode*);
 +#endif
 pts_unix98_lookup(..., struct file *file, ...) {
+... when != S1
 +#ifdef CONFIG_KSU
 +	ksu_handle_devpts((struct inode *)file->f_path.dentry->d_inode);
 +#endif
-...
+S2
+... when any
 }
 
 // File: drivers/tty/pty.c
@@ -322,16 +335,19 @@ pts_unix98_lookup(..., struct file *file, ...) {
 
 @pts_unix98_lookup_file_hook_minimized_alternative depends on file in "pty.c"@
 identifier pts_inode;
+statement S1, S2;
 @@
 
 +#ifdef CONFIG_KSU
 +extern int ksu_handle_devpts(struct inode*);
 +#endif
 pts_unix98_lookup(..., struct inode *pts_inode, ...) {
+... when != S1
 +#ifdef CONFIG_KSU
 +	ksu_handle_devpts(pts_inode);
 +#endif
-...
+S2
+... when any
 }
 
 // Alternative for Linux >= 5.4
@@ -340,16 +356,19 @@ pts_unix98_lookup(..., struct inode *pts_inode, ...) {
 
 @devpts_get_priv depends on file in "inode.c"@
 identifier dentry;
+statement S1, S2;
 @@
 
 +#ifdef CONFIG_KSU
 +extern int ksu_handle_devpts(struct inode*);
 +#endif
 devpts_get_priv(struct dentry *dentry) {
+... when != S1
 +#ifdef CONFIG_KSU
 +	ksu_handle_devpts(dentry->d_inode);
 +#endif
-...
+S2
+... when any
 }
 
 
