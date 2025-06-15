@@ -28,6 +28,7 @@
 
 
 **Documentation**:
+- Cheatsheet: https://zenodo.org/records/14728559/files/coccinelle_cheat_sheet_20250123.pdf
 - Cookbook: https://github.com/kees/kernel-tools/tree/trunk/coccinelle
 - Grammar reference: https://coccinelle.gitlabpages.inria.fr/website/docs/main_grammar.html ([pdf](https://coccinelle.gitlabpages.inria.fr/website/docs/main_grammar.pdf))
 - Standard isomorphisms: https://coccinelle.gitlabpages.inria.fr/website/standard.iso.html
