@@ -258,6 +258,10 @@ identifier dev, typ, code, value;
 attribute name __read_mostly;
 @@
 
++#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES) || defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
++#error KernelSU: You're using manual hooks but you also enabled CONFIG_KPROBES or CONFIG_HAVE_KPROBES or CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
++#endif
++
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
 +extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
@@ -279,6 +283,10 @@ identifier dev, typ, code, value;
 attribute name __read_mostly;
 @@
 
++#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES) || defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
++#error KernelSU: You're using manual hooks but you also enabled CONFIG_KPROBES or CONFIG_HAVE_KPROBES or CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
++#endif
++
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
 +extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
