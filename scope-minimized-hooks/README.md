@@ -1,4 +1,4 @@
-**Supported Linux kernels: 3.4 to 5.10**
+**Supported Linux kernels: 3.4 to 6.15 (and above)**
 
 Alternative manual hooks from @backslashxx that are designed to minimize the number of common code paths that are hooked in order to reduce their performance impact (though nobody proved that the original hooks have any significant perf impact AFAIK…)
 
