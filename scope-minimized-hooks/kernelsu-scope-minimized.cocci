@@ -264,8 +264,8 @@ attribute name __read_mostly;
 statement S1, S2;
 @@
 
-+#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES) || defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
-+#error KernelSU: You're using manual hooks but you also enabled CONFIG_KPROBES or CONFIG_HAVE_KPROBES or CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
++#if defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
++#error KernelSU: You're using manual hooks but you also enabled CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
 +#endif
 +
 +#ifdef CONFIG_KSU
@@ -292,8 +292,8 @@ attribute name __read_mostly;
 statement S1, S2;
 @@
 
-+#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES) || defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
-+#error KernelSU: You're using manual hooks but you also enabled CONFIG_KPROBES or CONFIG_HAVE_KPROBES or CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
++#if defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
++#error KernelSU: You're using manual hooks but you also enabled CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
 +#endif
 +
 +#ifdef CONFIG_KSU
