@@ -3,6 +3,7 @@
 @@
 attribute name __read_mostly;
 identifier fd, filename, argv, envp, flags;
+statement S1, S2;
 @@
 
 +#ifdef CONFIG_KSU
@@ -11,11 +12,13 @@ identifier fd, filename, argv, envp, flags;
 +extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr, void *argv, void *envp, int *flags);
 +#endif
 do_execveat_common(int fd, struct filename *filename, struct user_arg_ptr argv, struct user_arg_ptr envp, int flags) {
+... when != S1
 +#ifdef CONFIG_KSU
 +if (unlikely(ksu_execveat_hook))
 +  ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
 +else
 +  ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
 +#endif
+S2
 ...
 }

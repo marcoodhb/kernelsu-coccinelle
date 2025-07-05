@@ -181,7 +181,7 @@ faccessat(int dfd, const char __user *filename, int mode) {
 +	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
 +#endif
 S2
-... when any
+...
 }
 
 // File: fs/read_write.c
@@ -279,7 +279,7 @@ input_event(struct input_dev *dev, unsigned int typ, unsigned int code, int valu
 +		ksu_handle_input_handle_event(&typ, &code, &value);
 +#endif
 S2
-... when any
+...
 }
 
 // Alternative for Linux >= 5.4
@@ -327,7 +327,7 @@ pts_unix98_lookup(..., struct file *file, ...) {
 +	ksu_handle_devpts((struct inode *)file->f_path.dentry->d_inode);
 +#endif
 S2
-... when any
+...
 }
 
 // File: drivers/tty/pty.c
@@ -347,7 +347,7 @@ pts_unix98_lookup(..., struct inode *pts_inode, ...) {
 +	ksu_handle_devpts(pts_inode);
 +#endif
 S2
-... when any
+...
 }
 
 // Alternative for Linux >= 5.4
@@ -368,7 +368,7 @@ devpts_get_priv(struct dentry *dentry) {
 +	ksu_handle_devpts(dentry->d_inode);
 +#endif
 S2
-... when any
+...
 }
 
 

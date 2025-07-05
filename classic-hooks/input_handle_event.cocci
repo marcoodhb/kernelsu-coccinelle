@@ -5,7 +5,7 @@ attribute name __read_mostly;
 identifier disposition, dev, type, code, value;
 @@
 +#if defined(CONFIG_KPROBES) || defined(CONFIG_HAVE_KPROBES)
-+#error KernelSU: You're using manual hooks but you also enabled CONFIG_KPROBES or CONFIG_HAVE_KPROBES. Remove CONFIG_KPROBES=y and CONFIG_HAVE_KPROBES=y from your defconfig, noob.
++#error KernelSU: You're using manual hooks but you also enabled CONFIG_KPROBES or CONFIG_HAVE_KPROBES. Add "# CONFIG_KPROBES is not set" and "# CONFIG_HAVE_KPROBES is not set" at the bottom of your defconfig, noob.
 +#endif
 +
 +#ifdef CONFIG_KSU

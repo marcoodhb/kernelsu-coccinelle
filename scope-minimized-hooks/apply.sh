@@ -16,5 +16,5 @@ cd "$target_kernel_dir"
 while IFS= read -r p; do
     spatch --very-quiet --sp-file "$sp_file" --in-place --linux-spacing "$p" || true
 done << EOF
-"$files"
+$files
 EOF
