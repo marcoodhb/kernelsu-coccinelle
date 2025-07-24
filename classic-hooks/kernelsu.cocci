@@ -88,7 +88,7 @@ identifier disposition, dev, type, code, value;
 @@
 
 +#if defined(CONFIG_KSU_KPROBES_HOOK) || defined(CONFIG_KSU_HOOK_KPROBES) || defined(CONFIG_KSU_WITH_KPROBES)
-+#error KernelSU: You're using manual hooks but you also enabled CONFIG_KSU_KPROBES_HOOK or CONFIG_KSU_HOOK_KPROBES or CONFIG_KSU_WITH_KPROBES. Disable all of them in your defconfig and/or KSU config.
++#error KernelSU: Manual hooks are incompatible with CONFIG_KSU_KPROBES_HOOK, CONFIG_KSU_HOOK_KPROBES, or CONFIG_KSU_WITH_KPROBES. Disable them in your defconfig and/or KSU config.
 +#endif
 +
 +#ifdef CONFIG_KSU
