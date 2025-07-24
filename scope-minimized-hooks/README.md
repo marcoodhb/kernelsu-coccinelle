@@ -1,4 +1,4 @@
-# KernelSU Coccinelle (classic hooks)
+# KernelSU Coccinelle (scope-minimized manual hooks)
 
 **Supported Linux kernels: 3.4 to 6.15 (and above)**
 
@@ -24,7 +24,7 @@ Best practice is to apply these patches in a CI step right before building the k
     ```
 3) Run the patcher script:
     ```
-    cd kernelsu-coccinelle/classic-hooks
+    cd kernelsu-coccinelle/scope-minimized-hooks
     ./apply.sh /path/to/your/kernel/source
     ```
 
