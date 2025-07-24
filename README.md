@@ -4,14 +4,6 @@ This repository contains semantic patches that can be used to apply so-called �
 
 These patches are much more robust and universal than diffs. In addition to working on a wide range of kernel versions, they don't care about comments, spacing, crappy vendor kernel backports, most variable names, etc. The downside is that they are *much* harder to create and the documentation is sparse. Now, today is your lucky day because I already went through all the trouble myself so that you can stay blissfully unaware of how it actually works.
 
-# Quick use
-
-If you are too lazy to read anything then just go to your Android kernel directory and run this:
-
-```sh
-curl https://raw.githubusercontent.com/devnoname120/kernelsu-coccinelle/online/apply.sh | sh
-```
-
 # Hook types
 
 There are two flavors of the patches needed to integrate KernelSU and its forks into your kernel:
@@ -20,7 +12,7 @@ There are two flavors of the patches needed to integrate KernelSU and its forks 
 
 Those are a re-implementation of the OG “manual hooks” as semantic patches with some additional required backports. These are the most basic and have the best compatibility with OG KernelSU* and its forks.
 
-  👉 See [`classic-hooks/README.md`](classic-hooks/README.md).
+ 👉 See [`classic-hooks/README.md`](classic-hooks/README.md).
 
 ## 2. [Scope-minimized hooks](https://github.com/devnoname120/kernelsu-coccinelle/tree/main/scope-minimized-hooks)
 
