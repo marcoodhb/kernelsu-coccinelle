@@ -446,6 +446,7 @@ if (new_tsec->sid == old_tsec->sid)
 +		return 0;
 +	}
 +}
++#endif
 ... when != selinux_policycap_nnp_nosuid_transition
 }
 
