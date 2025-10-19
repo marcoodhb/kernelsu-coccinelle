@@ -104,6 +104,7 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU
++__attribute__((hot))
 +extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 +#endif
 newfstatat(int dfd, const char __user *filename, ..., int flag) {
@@ -124,6 +125,7 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU
++__attribute__((hot))
 +extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 +#endif
 fstatat64(int dfd, const char __user *filename, ..., int flag) {
