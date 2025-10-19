@@ -13,11 +13,9 @@ attribute name __read_mostly;
 @@
 
 +#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+			void *envp, int *flags);
-+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
-+				 void *argv, void *envp, int *flags);
++__attribute__((hot))
++extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
++ void *argv, void *envp, int *flags);
 +#endif
 do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
 ...
@@ -25,10 +23,7 @@ do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
  	struct user_arg_ptr envp = { .ptr.native = __envp };
 
 +#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
++	ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
 +#endif
 ...
 }
@@ -40,127 +35,11 @@ identifier filenam, argv, envp;
 compat_do_execve(struct filename *filenam, ...) {
 ...
 +#ifdef CONFIG_KSU // 32-bit su, 32-on-64 ksud support
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
++	ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
 +#endif
  	return do_execveat_common(AT_FDCWD, filenam, argv, envp, 0);
 }
 
-// Alternative for Linux <= 3.4
-// File arch/arm/kernel/sys_arm.c
-// Adds hook to asmlinkage int sys_execve()
-@do_execve_hook_minimized_alternative depends on file in "arch/arm/kernel/sys_arm.c" && never do_execve_hook_minimized@
-identifier filenamei, argv, envp;
-identifier error, filenam;
-type T1;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+ 			void *envp, int *flags);
-+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
-+ 				 void *argv, void *envp, int *flags);
-+#endif
-sys_execve(T1 filenamei, const char __user *const __user *argv, const char __user *const __user *envp, ...) {
-	int error;
-	struct filename *filenam;
-
-	filenam = getname(filenamei);
-	error = PTR_ERR(filenam);
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
-+#endif
-...
-}
-
-// Another alternative for Linux <= 3.4 (char * instead of struct filename *)
-// File arch/arm/kernel/sys_arm.c
-// Adds hook to asmlinkage int sys_execve()
-@do_execve_hook_minimized_alternative2 depends on file in "arch/arm/kernel/sys_arm.c" && never do_execve_hook_minimized@
-identifier filenamei, argv;
-identifier error, filename;
-type T1;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execve_sucompat(int *fd, const char __user **filename_user,
-+			       void *__never_use_argv, void *__never_use_envp,
-+			       int *__never_use_flags);
-+extern int ksu_handle_execve_ksud(const char __user *filename_user,
-+			const char __user *const __user *__argv);
-+#endif
-
-sys_execve(T1 filenamei, const char __user *const __user *argv, ...) {
-	int error;
-	char *filename;
-
-	filename = getname(filenamei);
-	error = PTR_ERR(filename);
-
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execve_ksud(filename, argv);
-+	else
-+		ksu_handle_execve_sucompat((int *)AT_FDCWD, &filename, NULL, NULL, NULL);
-+#endif
-...
-}
-
-// Alternative for Linux 3.10
-// File fs/exec.c
-// Adds hook to SYSCALL_DEFINE3(execve, ...).
-@do_execve_hook_minimized_alternative3_1 depends on file in "fs/exec.c" && never do_execve_hook_minimized && never do_execve_hook_minimized_alternative && never do_execve_hook_minimized_alternative2@
-identifier filenam, argv, envp;
-identifier path, error;
-type T1;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+			void *envp, int *flags);
-+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
-+				 void *argv, void *envp, int *flags);
-+#endif
-execve(T1 filenam, const char __user *const __user *argv, const char __user *const __user *envp) {
-	struct filename *path = getname(filenam);
-	int error = PTR_ERR(path);
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &path, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &path, NULL, NULL, NULL);
-+#endif
-...
-}
-
-// Second part of alternative for Linux 3.10
-@do_execve_hook_minimized_alternative3_2 depends on do_execve_hook_minimized_alternative3_1 exists@
-identifier filenam, error;
-identifier path;
-type T1;
-@@
-compat_sys_execve(T1 filenam, ...) {
-	struct filename *path = getname(filenam);
-	int error = PTR_ERR(path);
-...
-+#ifdef CONFIG_KSU
-+	if (!ksu_execveat_hook)
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &path, NULL, NULL, NULL); /* 32-bit su */
-+#endif
-error = compat_do_execve(...);
-...
-}
 
 // File: fs/open.c
 // Adds hook to SYSCALL_DEFINE3(faccessat, ...).
