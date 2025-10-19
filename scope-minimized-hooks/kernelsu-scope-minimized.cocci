@@ -152,7 +152,8 @@ statement S1, S2;
 +
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
-+extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
++extern __attribute__((cold)) int ksu_handle_input_handle_event(
++ unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
 ... when != S1
@@ -180,7 +181,8 @@ statement S1, S2;
 +
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
-+extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
++extern __attribute__((cold)) int ksu_handle_input_handle_event(
++ unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_handle_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
 ... when != S1
