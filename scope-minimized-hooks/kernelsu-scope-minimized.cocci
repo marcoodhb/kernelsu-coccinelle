@@ -74,8 +74,8 @@ attribute name __user, __read_mostly;
 
 +#ifdef CONFIG_KSU
 +extern bool ksu_vfs_read_hook __read_mostly;
-+extern int ksu_handle_sys_read(unsigned int fd, char __user **buf_ptr,
-+			size_t *count_ptr);
++extern __attribute__((cold)) int ksu_handle_sys_read(unsigned int fd,
++ char __user **buf_ptr, size_t *count_ptr);
 +#endif
 read(unsigned int fd, char __user *buf, size_t count) {
 ...
