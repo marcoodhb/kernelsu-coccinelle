@@ -311,67 +311,6 @@ S2
 }
 
 
-// File: drivers/tty/pty.c
-// Adds hook to pts_unix98_lookup(...) with struct file* parameter.
-
-@pts_unix98_lookup_file_hook_minimized depends on file in "drivers/tty/pty.c"@
-identifier file;
-statement S1, S2;
-@@
-+#ifdef CONFIG_KSU
-+extern int ksu_handle_devpts(struct inode*);
-+#endif
-pts_unix98_lookup(..., struct file *file, ...) {
-... when != S1
-+#ifdef CONFIG_KSU
-+	ksu_handle_devpts((struct inode *)file->f_path.dentry->d_inode);
-+#endif
-S2
-...
-}
-
-// File: drivers/tty/pty.c
-// Adds hook to pts_unix98_lookup(...) with struct inode* parameter.
-
-@pts_unix98_lookup_file_hook_minimized_alternative depends on file in "drivers/tty/pty.c"@
-identifier pts_inode;
-statement S1, S2;
-@@
-
-+#ifdef CONFIG_KSU
-+extern int ksu_handle_devpts(struct inode*);
-+#endif
-pts_unix98_lookup(..., struct inode *pts_inode, ...) {
-... when != S1
-+#ifdef CONFIG_KSU
-+	ksu_handle_devpts(pts_inode);
-+#endif
-S2
-...
-}
-
-// Alternative for Linux >= 5.4
-// File: fs/devpts/inode.c
-// Adds hook to devpts_get_priv(...).
-
-@devpts_get_priv depends on file in "fs/devpts/inode.c"@
-identifier dentry;
-statement S1, S2;
-@@
-
-+#ifdef CONFIG_KSU
-+extern int ksu_handle_devpts(struct inode*);
-+#endif
-devpts_get_priv(struct dentry *dentry) {
-... when != S1
-+#ifdef CONFIG_KSU
-+	ksu_handle_devpts(dentry->d_inode);
-+#endif
-S2
-...
-}
-
-
 @has_can_umount@
 identifier path, flags;
 @@
