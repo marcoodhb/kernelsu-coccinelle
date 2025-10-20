@@ -13,8 +13,7 @@ attribute name __read_mostly;
 @@
 
 +#ifdef CONFIG_KSU
-+__attribute__((hot))
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
++extern __attribute__((hot)) int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags);
 +#endif
 do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
