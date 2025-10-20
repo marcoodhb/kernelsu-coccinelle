@@ -15,7 +15,7 @@ attribute name __read_mostly;
 +#ifdef CONFIG_KSU
 +__attribute__((hot))
 +extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
-+ void *argv, void *envp, int *flags);
++				void *argv, void *envp, int *flags);
 +#endif
 do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
 ...
@@ -53,7 +53,7 @@ attribute name __user;
 +#ifdef CONFIG_KSU
 +__attribute__((hot))
 +extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
-+			                    int *mode, int *flags);
++				int *mode, int *flags);
 +#endif
 faccessat(int dfd, const char __user *filename, int mode) {
 ... when != S1
@@ -75,7 +75,7 @@ attribute name __user, __read_mostly;
 +#ifdef CONFIG_KSU
 +extern bool ksu_vfs_read_hook __read_mostly;
 +extern __attribute__((cold)) int ksu_handle_sys_read(unsigned int fd,
-+ char __user **buf_ptr, size_t *count_ptr);
++				char __user **buf_ptr, size_t *count_ptr);
 +#endif
 read(unsigned int fd, char __user *buf, size_t count) {
 ...
@@ -153,7 +153,7 @@ statement S1, S2;
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
 +extern __attribute__((cold)) int ksu_handle_input_handle_event(
-+ unsigned int *type, unsigned int *code, int *value);
++			unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
 ... when != S1
@@ -182,7 +182,7 @@ statement S1, S2;
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
 +extern __attribute__((cold)) int ksu_handle_input_handle_event(
-+ unsigned int *type, unsigned int *code, int *value);
++			unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_handle_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
 ... when != S1
