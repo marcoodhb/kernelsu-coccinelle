@@ -306,3 +306,26 @@ extern void groups_sort(struct group_info *);
 	...
 }
 +EXPORT_SYMBOL(groups_sort);
+
+
+
+
+// File: kernel/reboot.c
+// Adds hook to SYSCALL_DEFINE4(reboot, ...) for new supercall feature.
+
+@sys_reboot_hook depends on file in "kernel/reboot.c"@
+identifier magic1, magic2, cmd, arg;
+@@
+
++#ifdef CONFIG_KSU
++extern int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user **arg);
++#endif
+SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
+ 		void __user *, arg)
+{
+...
++#ifdef CONFIG_KSU 
++	ksu_handle_sys_reboot(magic1, magic2, cmd, &arg);
++#endif
+...
+}
