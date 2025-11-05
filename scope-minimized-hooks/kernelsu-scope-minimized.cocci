@@ -323,8 +323,7 @@ type T_ARG;
 
 reboot(int magic1, int magic2, unsigned int cmd, T_ARG arg)
 {
-...
-+#ifdef CONFIG_KSU 
++#ifdef CONFIG_KSU
 +	ksu_handle_sys_reboot(magic1, magic2, cmd, &arg);
 +#endif
 ...
