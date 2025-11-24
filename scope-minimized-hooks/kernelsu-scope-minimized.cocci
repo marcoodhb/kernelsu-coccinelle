@@ -13,11 +13,8 @@ attribute name __read_mostly;
 @@
 
 +#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+			void *envp, int *flags);
-+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
-+				 void *argv, void *envp, int *flags);
++extern __attribute__((hot)) int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
++				void *argv, void *envp, int *flags);
 +#endif
 do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
 ...
@@ -25,10 +22,7 @@ do_execve(struct filename *filenam, T1 __argv, T2 __envp) {
  	struct user_arg_ptr envp = { .ptr.native = __envp };
 
 +#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
++	ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
 +#endif
 ...
 }
@@ -40,127 +34,11 @@ identifier filenam, argv, envp;
 compat_do_execve(struct filename *filenam, ...) {
 ...
 +#ifdef CONFIG_KSU // 32-bit su, 32-on-64 ksud support
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
++	ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
 +#endif
  	return do_execveat_common(AT_FDCWD, filenam, argv, envp, 0);
 }
 
-// Alternative for Linux <= 3.4
-// File arch/arm/kernel/sys_arm.c
-// Adds hook to asmlinkage int sys_execve()
-@do_execve_hook_minimized_alternative depends on file in "arch/arm/kernel/sys_arm.c" && never do_execve_hook_minimized@
-identifier filenamei, argv, envp;
-identifier error, filenam;
-type T1;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+ 			void *envp, int *flags);
-+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
-+ 				 void *argv, void *envp, int *flags);
-+#endif
-sys_execve(T1 filenamei, const char __user *const __user *argv, const char __user *const __user *envp, ...) {
-	int error;
-	struct filename *filenam;
-
-	filenam = getname(filenamei);
-	error = PTR_ERR(filenam);
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &filenam, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &filenam, NULL, NULL, NULL);
-+#endif
-...
-}
-
-// Another alternative for Linux <= 3.4 (char * instead of struct filename *)
-// File arch/arm/kernel/sys_arm.c
-// Adds hook to asmlinkage int sys_execve()
-@do_execve_hook_minimized_alternative2 depends on file in "arch/arm/kernel/sys_arm.c" && never do_execve_hook_minimized@
-identifier filenamei, argv;
-identifier error, filename;
-type T1;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execve_sucompat(int *fd, const char __user **filename_user,
-+			       void *__never_use_argv, void *__never_use_envp,
-+			       int *__never_use_flags);
-+extern int ksu_handle_execve_ksud(const char __user *filename_user,
-+			const char __user *const __user *__argv);
-+#endif
-
-sys_execve(T1 filenamei, const char __user *const __user *argv, ...) {
-	int error;
-	char *filename;
-
-	filename = getname(filenamei);
-	error = PTR_ERR(filename);
-
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execve_ksud(filename, argv);
-+	else
-+		ksu_handle_execve_sucompat((int *)AT_FDCWD, &filename, NULL, NULL, NULL);
-+#endif
-...
-}
-
-// Alternative for Linux 3.10
-// File fs/exec.c
-// Adds hook to SYSCALL_DEFINE3(execve, ...).
-@do_execve_hook_minimized_alternative3_1 depends on file in "fs/exec.c" && never do_execve_hook_minimized && never do_execve_hook_minimized_alternative && never do_execve_hook_minimized_alternative2@
-identifier filenam, argv, envp;
-identifier path, error;
-type T1;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_execveat_hook __read_mostly;
-+extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+			void *envp, int *flags);
-+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
-+				 void *argv, void *envp, int *flags);
-+#endif
-execve(T1 filenam, const char __user *const __user *argv, const char __user *const __user *envp) {
-	struct filename *path = getname(filenam);
-	int error = PTR_ERR(path);
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_execveat_hook))
-+		ksu_handle_execveat((int *)AT_FDCWD, &path, &argv, &envp, 0);
-+	else
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &path, NULL, NULL, NULL);
-+#endif
-...
-}
-
-// Second part of alternative for Linux 3.10
-@do_execve_hook_minimized_alternative3_2 depends on do_execve_hook_minimized_alternative3_1 exists@
-identifier filenam, error;
-identifier path;
-type T1;
-@@
-compat_sys_execve(T1 filenam, ...) {
-	struct filename *path = getname(filenam);
-	int error = PTR_ERR(path);
-...
-+#ifdef CONFIG_KSU
-+	if (!ksu_execveat_hook)
-+		ksu_handle_execveat_sucompat((int *)AT_FDCWD, &path, NULL, NULL, NULL); /* 32-bit su */
-+#endif
-error = compat_do_execve(...);
-...
-}
 
 // File: fs/open.c
 // Adds hook to SYSCALL_DEFINE3(faccessat, ...).
@@ -172,8 +50,8 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU
-+extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
-+			                    int *flags);
++extern __attribute__((hot)) int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
++				int *mode, int *flags);
 +#endif
 faccessat(int dfd, const char __user *filename, int mode) {
 ... when != S1
@@ -194,8 +72,8 @@ attribute name __user, __read_mostly;
 
 +#ifdef CONFIG_KSU
 +extern bool ksu_vfs_read_hook __read_mostly;
-+extern int ksu_handle_sys_read(unsigned int fd, char __user **buf_ptr,
-+			size_t *count_ptr);
++extern __attribute__((cold)) int ksu_handle_sys_read(unsigned int fd,
++				char __user **buf_ptr, size_t *count_ptr);
 +#endif
 read(unsigned int fd, char __user *buf, size_t count) {
 ...
@@ -224,7 +102,7 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU
-+extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
++extern __attribute__((hot)) int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 +#endif
 newfstatat(int dfd, const char __user *filename, ..., int flag) {
 ...
@@ -244,7 +122,7 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU
-+extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
++extern __attribute__((hot)) int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
 +#endif
 fstatat64(int dfd, const char __user *filename, ..., int flag) {
 ...
@@ -270,7 +148,8 @@ statement S1, S2;
 +
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
-+extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
++extern __attribute__((cold)) int ksu_handle_input_handle_event(
++			unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
 ... when != S1
@@ -298,74 +177,14 @@ statement S1, S2;
 +
 +#ifdef CONFIG_KSU
 +extern bool ksu_input_hook __read_mostly;
-+extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
++extern __attribute__((cold)) int ksu_handle_input_handle_event(
++			unsigned int *type, unsigned int *code, int *value);
 +#endif
 input_handle_event(struct input_dev *dev, unsigned int typ, unsigned int code, int value) {
 ... when != S1
 +#ifdef CONFIG_KSU
 +	if (unlikely(ksu_input_hook))
 +		ksu_handle_input_handle_event(&typ, &code, &value);
-+#endif
-S2
-...
-}
-
-
-// File: drivers/tty/pty.c
-// Adds hook to pts_unix98_lookup(...) with struct file* parameter.
-
-@pts_unix98_lookup_file_hook_minimized depends on file in "drivers/tty/pty.c"@
-identifier file;
-statement S1, S2;
-@@
-+#ifdef CONFIG_KSU
-+extern int ksu_handle_devpts(struct inode*);
-+#endif
-pts_unix98_lookup(..., struct file *file, ...) {
-... when != S1
-+#ifdef CONFIG_KSU
-+	ksu_handle_devpts((struct inode *)file->f_path.dentry->d_inode);
-+#endif
-S2
-...
-}
-
-// File: drivers/tty/pty.c
-// Adds hook to pts_unix98_lookup(...) with struct inode* parameter.
-
-@pts_unix98_lookup_file_hook_minimized_alternative depends on file in "drivers/tty/pty.c"@
-identifier pts_inode;
-statement S1, S2;
-@@
-
-+#ifdef CONFIG_KSU
-+extern int ksu_handle_devpts(struct inode*);
-+#endif
-pts_unix98_lookup(..., struct inode *pts_inode, ...) {
-... when != S1
-+#ifdef CONFIG_KSU
-+	ksu_handle_devpts(pts_inode);
-+#endif
-S2
-...
-}
-
-// Alternative for Linux >= 5.4
-// File: fs/devpts/inode.c
-// Adds hook to devpts_get_priv(...).
-
-@devpts_get_priv depends on file in "fs/devpts/inode.c"@
-identifier dentry;
-statement S1, S2;
-@@
-
-+#ifdef CONFIG_KSU
-+extern int ksu_handle_devpts(struct inode*);
-+#endif
-devpts_get_priv(struct dentry *dentry) {
-... when != S1
-+#ifdef CONFIG_KSU
-+	ksu_handle_devpts(dentry->d_inode);
 +#endif
 S2
 ...
@@ -418,37 +237,6 @@ do_umount(...) { ... }
 +return ret;
 +}
 
-
-// File: security/selinux/hooks.c
-// Backport for Linux < 4.14
-@selinux_no_nnp_transition depends on file in "security/selinux/hooks.c"@
-identifier new_tsec, old_tsec;
-@@
-
-check_nnp_nosuid(...) {
-	...
-if (new_tsec->sid == old_tsec->sid)
-	return 0;
-+
-+#ifdef CONFIG_KSU
-+static u32 ksu_sid;
-+char *secdata;
-+int error;
-+u32 seclen;
-+if (!ksu_sid) {
-+		security_secctx_to_secid("u:r:su:s0", strlen("u:r:su:s0"), &ksu_sid);
-+}
-+error = security_secid_to_secctx(old_tsec->sid, &secdata, &seclen);
-+if (!error) {
-+	rc = strcmp("u:r:init:s0",secdata);
-+	security_release_secctx(secdata, seclen);
-+	if (rc == 0 && new_tsec->sid == ksu_sid) {
-+		return 0;
-+	}
-+}
-+#endif
-... when != selinux_policycap_nnp_nosuid_transition
-}
 
 
 // File: include/linux/cred.h
@@ -518,3 +306,63 @@ extern void groups_sort(struct group_info *);
 	...
 }
 +EXPORT_SYMBOL(groups_sort);
+
+
+
+// File: kernel/reboot.c
+// Adds hook to SYSCALL_DEFINE4(reboot, ...)
+
+@sys_reboot_hook depends on file in "kernel/reboot.c"@
+identifier magic1, magic2, cmd, arg;
+identifier pid_ns;
+type T_ARG;
+@@
+
++#ifdef CONFIG_KSU
++extern int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user **arg);
++#endif
++
+reboot(int magic1, int magic2, unsigned int cmd, T_ARG arg)
+{
+...
++#ifdef CONFIG_KSU
++	ksu_handle_sys_reboot(magic1, magic2, cmd, &arg);
++#endif
+  if (!ns_capable(pid_ns->user_ns, CAP_SYS_BOOT))
+		return -EPERM;
+...
+}
+
+
+
+// File: security/selinux/avc.c
+@avc_header depends on file in "security/selinux/avc.c"@
+@@
+
+avc_audit_post_callback(...) { ... }
++
++#ifdef CONFIG_KSU_EXTRAS
++extern int ksu_handle_slow_avc_audit(u32 *tsid);
++#endif
++
+
+
+
+// Insert hook avc.c
+@avc_body depends on file in "security/selinux/avc.c"@
+typedef u32, u16;
+identifier ssid, tclass, req, aud, den, res, state, a;
+identifier tsid;
+@@
+
+slow_avc_audit(struct selinux_state *state, u32 ssid, u32 tsid, u16 tclass, u32 req, u32 aud, u32 den, int res, struct common_audit_data *a)
+{
+...
++
++#ifdef CONFIG_KSU_EXTRAS
++	ksu_handle_slow_avc_audit(&tsid);
++#endif
++
+if (!a) { ... }
+...
+}
