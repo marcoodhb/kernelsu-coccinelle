@@ -341,10 +341,9 @@ reboot(int magic1, int magic2, unsigned int cmd, T_ARG arg)
 
 avc_audit_post_callback(...) { ... }
 +
-+#ifdef CONFIG_KSU_EXTRAS
-+extern int ksu_handle_slow_avc_audit(u32 *tsid);
++#ifdef CONFIG_KSU
++extern int ksu_handle_slow_avc_audit_new(u32 tsid, u16 *tclass);
 +#endif
-+
 
 
 
@@ -358,9 +357,10 @@ identifier tsid;
 slow_avc_audit(struct selinux_state *state, u32 ssid, u32 tsid, u16 tclass, u32 req, u32 aud, u32 den, int res, struct common_audit_data *a)
 {
 ...
-+
-+#ifdef CONFIG_KSU_EXTRAS
-+	ksu_handle_slow_avc_audit(&tsid);
++#ifdef CONFIG_KSU
++	ksu_handle_slow_avc_audit_new(tsid, &tclass);
++	if (!tclass)
++		return 0;	
 +#endif
 +
 if (!a) { ... }
