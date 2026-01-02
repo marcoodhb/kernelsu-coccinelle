@@ -62,37 +62,6 @@ S2
 ...
 }
 
-// File: fs/read_write.c
-// Adds hook to SYSCALL_DEFINE3(read, ...).
-
-@sys_read_hook_minimized depends on file in "fs/read_write.c" exists@
-identifier fd, buf, count, ret, pos;
-attribute name __user, __read_mostly;
-@@
-
-+#ifdef CONFIG_KSU
-+extern bool ksu_vfs_read_hook __read_mostly;
-+extern __attribute__((cold)) int ksu_handle_sys_read(unsigned int fd,
-+				char __user **buf_ptr, size_t *count_ptr);
-+#endif
-read(unsigned int fd, char __user *buf, size_t count) {
-...
-(
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_vfs_read_hook))
-+		ksu_handle_sys_read(fd, &buf, &count);
-+#endif
-  return ksys_read(fd, buf, count);
-|
-+#ifdef CONFIG_KSU
-+	if (unlikely(ksu_vfs_read_hook))
-+		ksu_handle_sys_read(fd, &buf, &count);
-+#endif
-  ret = vfs_read(..., buf, count, &pos);
-)
-...
-}
-
 // File: fs/stat.c
 // Adds hook to SYSCALL_DEFINE4(newfstatat, ...)
 
