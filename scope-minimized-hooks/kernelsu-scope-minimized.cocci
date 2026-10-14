@@ -6,14 +6,11 @@
 // Adds hook to do_execveat_common()
 
 @do_execveat_common_hook depends on file in "fs/exec.c"@
-attribute name __attribute__;
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
-+__attribute__((hot))
 +extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags);
-+__attribute__((hot))
 +extern int ksu_handle_post_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags, int *retval);
 +#endif
@@ -42,12 +39,10 @@ static int do_execveat_common(int fd, struct filename *filename,
 // Adds hook to SYSCALL_DEFINE3(faccessat, ...)
 
 @sys_faccessat_hook depends on file in "fs/open.c"@
-attribute name __attribute__;
 attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
-+__attribute__((hot))
 +extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
 +				int *mode, int *flags);
 +#endif
@@ -67,11 +62,9 @@ faccessat(int dfd, const char __user *filename, int mode)
 @sys_newfstatat_hook depends on file in "fs/stat.c" exists@
 identifier dfd, filename, flag, error, stat;
 attribute name __user;
-attribute name __attribute__;
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
-+__attribute__((hot))
 +extern int ksu_handle_stat(int *dfd, const char __user **filename_user,
 +				int *flags);
 +#endif
