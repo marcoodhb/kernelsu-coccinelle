@@ -9,10 +9,8 @@
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
-+__attribute__((hot))
 +extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags);
-+__attribute__((hot))
 +extern int ksu_handle_post_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags, int *retval);
 +#endif
@@ -45,7 +43,6 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
-+__attribute__((hot))
 +extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
 +				int *mode, int *flags);
 +#endif
@@ -74,7 +71,6 @@ newlstat(const char __user *filename, struct stat __user *statbuf)
 }
 +
 +#ifdef CONFIG_KSU_MANUAL_HOOK
-+__attribute__((hot))
 +extern int ksu_handle_stat(int *dfd, const char __user **filename_user,
 +				int *flags);
 +
