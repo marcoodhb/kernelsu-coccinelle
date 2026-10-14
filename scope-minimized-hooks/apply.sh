@@ -25,7 +25,7 @@ sed -i '/extern int ksu_handle_faccessat/i __attribute__((hot))' fs/open.c 2>/de
 sed -i '/extern int ksu_handle_stat/i __attribute__((hot))' fs/stat.c 2>/dev/null || true
 
 
-sed -i -E 's/^static (ssize_t \(\*write_op\[\]\))/\1/' security/selinux/selinuxfs.c
+sed -i -E 's/^static (ssize_t \(\*const write_op\[\]\))/\1/' security/selinux/selinuxfs.c
 sed -i -E 's/^static (const struct file_operations sel_handle_status_ops)/\1/' security/selinux/selinuxfs.c
 sed -i -E 's/^static (void security_dump_masked_av)/\1/' security/selinux/ss/services.c
 sed -i -E 's/^static (void context_struct_compute_av)/\1/' security/selinux/ss/services.c
