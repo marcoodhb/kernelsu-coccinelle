@@ -9,8 +9,10 @@
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
++__attribute__((hot))
 +extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags);
++__attribute__((hot))
 +extern int ksu_handle_post_execveat(int *fd, struct filename **filename_ptr,
 +				void *argv, void *envp, int *flags, int *retval);
 +#endif
@@ -43,6 +45,7 @@ attribute name __user;
 @@
 
 +#ifdef CONFIG_KSU_MANUAL_HOOK
++__attribute__((hot))
 +extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
 +				int *mode, int *flags);
 +#endif
@@ -57,6 +60,32 @@ faccessat(int dfd, const char __user *filename, int mode)
 
 
 // File: fs/stat.c
+// Declaraciones de stat: justo despues del cierre de SYSCALL_DEFINE2(newlstat, ...),
+// igual que la guia de BakaSU (incluye fstat64_ret: el check de BakaSU lo exige con CONFIG_COMPAT=y)
+
+@stat_decls depends on file in "fs/stat.c"@
+identifier filename, statbuf;
+attribute name __user;
+@@
+
+newlstat(const char __user *filename, struct stat __user *statbuf)
+{
+...
+}
++
++#ifdef CONFIG_KSU_MANUAL_HOOK
++__attribute__((hot))
++extern int ksu_handle_stat(int *dfd, const char __user **filename_user,
++				int *flags);
++
++extern void ksu_handle_newfstat_ret(unsigned int *fd, struct stat __user **statbuf_ptr);
++#if defined(__ARCH_WANT_STAT64) || defined(__ARCH_WANT_COMPAT_STAT64)
++extern void ksu_handle_fstat64_ret(unsigned long *fd, struct stat64 __user **statbuf_ptr);
++#endif
++#endif
+
+
+// File: fs/stat.c
 // Adds hook to SYSCALL_DEFINE4(newfstatat, ...)
 
 @sys_newfstatat_hook depends on file in "fs/stat.c" exists@
@@ -64,10 +93,6 @@ identifier dfd, filename, flag, error, stat;
 attribute name __user;
 @@
 
-+#ifdef CONFIG_KSU_MANUAL_HOOK
-+extern int ksu_handle_stat(int *dfd, const char __user **filename_user,
-+				int *flags);
-+#endif
 newfstatat(int dfd, const char __user *filename, ..., int flag) {
 ...
 +#ifdef CONFIG_KSU_MANUAL_HOOK
@@ -85,16 +110,32 @@ identifier fd, statbuf, stat, error;
 attribute name __user;
 @@
 
-+#ifdef CONFIG_KSU_MANUAL_HOOK
-+extern void ksu_handle_newfstat_ret(unsigned int *fd, struct stat __user **statbuf_ptr);
-+#endif
-+
 newfstat(unsigned int fd, struct stat __user *statbuf) {
 ...
 if (!error)
 	error = cp_new_stat(&stat, statbuf);
 +#ifdef CONFIG_KSU_MANUAL_HOOK
 +	ksu_handle_newfstat_ret(&fd, &statbuf);
++#endif
+return error;
+}
+
+
+// File: fs/stat.c
+// Adds return hook to SYSCALL_DEFINE2(fstat64, ...)
+// Solo existe si el arbol compila fstat64 (arm64 con CONFIG_COMPAT)
+
+@sys_fstat64_ret_hook depends on file in "fs/stat.c" exists@
+identifier fd, statbuf, stat, error;
+attribute name __user;
+@@
+
+fstat64(unsigned long fd, struct stat64 __user *statbuf) {
+...
+if (!error)
+	error = cp_new_stat64(&stat, statbuf);
++#ifdef CONFIG_KSU_MANUAL_HOOK
++	ksu_handle_fstat64_ret(&fd, &statbuf);
 +#endif
 return error;
 }
