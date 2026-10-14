@@ -18,3 +18,8 @@ while IFS= read -r p; do
 done << EOF
 $files
 EOF
+
+sed -i '/extern int ksu_handle_execveat/i __attribute__((hot))' fs/exec.c 2>/dev/null || true
+sed -i '/extern int ksu_handle_post_execveat/i __attribute__((hot))' fs/exec.c 2>/dev/null || true
+sed -i '/extern int ksu_handle_faccessat/i __attribute__((hot))' fs/open.c 2>/dev/null || true
+sed -i '/extern int ksu_handle_stat/i __attribute__((hot))' fs/stat.c 2>/dev/null || true
